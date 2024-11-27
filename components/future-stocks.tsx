@@ -28,7 +28,11 @@ export function FutureStocks() {
 
   useEffect(() => {
     const fetchStockPrices = async () => {
-      const uniqueSymbols = [...new Set(futureStocks.map((s) => s.symbol))];
+      if (futureStocks.length === 0) return;
+
+      const uniqueSymbols = Array.from(
+        new Set(futureStocks.map((s) => s.symbol))
+      );
       const prices: Record<string, number> = {};
 
       await Promise.all(
@@ -50,11 +54,9 @@ export function FutureStocks() {
       setStockPrices(prices);
     };
 
-    if (futureStocks.length > 0) {
-      fetchStockPrices();
-      const interval = setInterval(fetchStockPrices, 60000); // Update every minute
-      return () => clearInterval(interval);
-    }
+    fetchStockPrices();
+    const interval = setInterval(fetchStockPrices, 60000); // Update every minute
+    return () => clearInterval(interval);
   }, [futureStocks]);
 
   const calculateTotalValue = () => {
