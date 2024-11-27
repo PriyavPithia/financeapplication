@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useFinanceStore } from "@/lib/store";
+import { CurrencyCode } from "@/lib/types";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -35,27 +36,29 @@ const formSchema = z.object({
   amount: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
     message: "Amount must be a valid positive number.",
   }),
-  currency: z.enum(["GBP", "USD", "EUR", "JPY"]),
-  type: z.enum(["pension", "vested_stock", "other"]),
+  currency: z.enum(["GBP", "USD", "EUR", "JPY"] as const),
+  type: z.enum(["pension", "other"] as const),
   vestingDate: z.string().optional(),
 });
 
-export function EditFutureGainDialog({
-  open,
-  onOpenChange,
-  gain,
-}: {
+interface EditFutureGainDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   gain: {
     id: string;
     name: string;
     amount: number;
-    currency: "GBP" | "USD" | "EUR" | "JPY";
-    type: "pension" | "vested_stock" | "other";
+    currency: CurrencyCode;
+    type: "pension" | "other";
     vestingDate?: string;
   };
-}) {
+}
+
+export function EditFutureGainDialog({
+  open,
+  onOpenChange,
+  gain,
+}: EditFutureGainDialogProps) {
   const updateFutureGain = useFinanceStore((state) => state.updateFutureGain);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -114,7 +117,6 @@ export function EditFutureGainDialog({
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="pension">Pension</SelectItem>
-                      <SelectItem value="vested_stock">Vested Stock</SelectItem>
                       <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
