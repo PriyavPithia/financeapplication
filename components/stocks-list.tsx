@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -58,7 +58,8 @@ export function StocksList({ showBrokerageSummary = false }) {
     return acc;
   }, {} as Record<string, typeof stocks>);
 
-  const fetchStockData = async () => {
+  // Changed from React.useCallback to useCallback
+  const fetchStockData = useCallback(async () => {
     if (stocks.length === 0) return;
 
     setIsLoading(true);
@@ -114,13 +115,13 @@ export function StocksList({ showBrokerageSummary = false }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [stocks, stocksByBrokerage]);
 
   useEffect(() => {
     fetchStockData();
     const interval = setInterval(fetchStockData, 60000); // Update every minute
     return () => clearInterval(interval);
-  }, [stocks]);
+  }, [fetchStockData]); // Update dependency
 
   return (
     <Card>

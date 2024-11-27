@@ -2,20 +2,13 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { Stock, CurrencyCode } from './types';
 
 interface Account {
   id: string;
   name: string;
   balance: number;
-  currency: "GBP" | "USD" | "EUR" | "JPY";
-}
-
-interface Stock {
-  symbol: string;
-  shares: number;
-  brokerageAccount: string;
-  isCash?: boolean;
-  cashCurrency?: "GBP" | "USD" | "EUR" | "JPY";
+  currency: CurrencyCode;
 }
 
 interface FutureStock {
@@ -29,7 +22,7 @@ interface FutureGain {
   id: string;
   name: string;
   amount: number;
-  currency: "GBP" | "USD" | "EUR" | "JPY";
+  currency: CurrencyCode;
   type: "pension" | "other";
   vestingDate?: string;
 }
@@ -38,7 +31,7 @@ interface FutureExpense {
   id: string;
   name: string;
   amount: number;
-  currency: "GBP" | "USD" | "EUR" | "JPY";
+  currency: CurrencyCode;
   date: string;
   notes?: string;
 }
@@ -47,12 +40,12 @@ interface Subscription {
   id: string;
   name: string;
   amount: number;
-  currency: "GBP" | "USD" | "EUR" | "JPY";
+  currency: CurrencyCode;
   billingDate: number;
   isPaid: boolean;
 }
 
-interface FinanceStore {
+export interface FinanceStore {
   accounts: Account[];
   stocks: Stock[];
   futureStocks: FutureStock[];
@@ -65,7 +58,7 @@ interface FinanceStore {
   removeAccount: (id: string) => void;
   updateAccount: (id: string, data: Partial<Omit<Account, "id">>) => void;
 
-  addStock: (stock: Stock) => void;
+  addStock: (stock: Omit<Stock, "id">) => void;
   removeStock: (symbol: string) => void;
   updateShares: (symbol: string, shares: number, brokerageAccount: string) => void;
 
@@ -122,7 +115,7 @@ export const useFinanceStore = create<FinanceStore>()(
 
       addStock: (stock) =>
         set((state) => ({
-          stocks: [...state.stocks, stock],
+          stocks: [...state.stocks, { ...stock, id: crypto.randomUUID() }],
         })),
 
       removeStock: (symbol) =>

@@ -39,37 +39,37 @@ export function StockPortfolioHistogram() {
   const { stocks } = useFinanceStore();
   const [stockValues, setStockValues] = useState<StockValue[]>([]);
 
-  const fetchStockValues = async () => {
-    if (stocks.length === 0) {
-      setStockValues([]);
-      return;
-    }
-
-    try {
-      const values = await Promise.all(
-        stocks.map(async (stock, index) => {
-          const response = await fetch(
-            `https://finnhub.io/api/v1/quote?symbol=${stock.symbol}&token=${FINNHUB_API_KEY}`
-          );
-          const data = await response.json();
-          
-          return {
-            symbol: stock.symbol,
-            shares: stock.shares,
-            value: data.c * stock.shares * 0.79, // Convert to GBP
-            color: COLORS[index % COLORS.length],
-          };
-        })
-      );
-
-      // Sort by value in descending order
-      setStockValues(values.sort((a, b) => b.value - a.value));
-    } catch (error) {
-      console.error("Error fetching stock values:", error);
-    }
-  };
-
   useEffect(() => {
+    const fetchStockValues = async () => {
+      if (stocks.length === 0) {
+        setStockValues([]);
+        return;
+      }
+
+      try {
+        const values = await Promise.all(
+          stocks.map(async (stock, index) => {
+            const response = await fetch(
+              `https://finnhub.io/api/v1/quote?symbol=${stock.symbol}&token=${FINNHUB_API_KEY}`
+            );
+            const data = await response.json();
+            
+            return {
+              symbol: stock.symbol,
+              shares: stock.shares,
+              value: data.c * stock.shares * 0.79, // Convert to GBP
+              color: COLORS[index % COLORS.length],
+            };
+          })
+        );
+
+        // Sort by value in descending order
+        setStockValues(values.sort((a, b) => b.value - a.value));
+      } catch (error) {
+        console.error("Error fetching stock values:", error);
+      }
+    };
+
     fetchStockValues();
     const interval = setInterval(fetchStockValues, 60000); // Update every minute
     return () => clearInterval(interval);
